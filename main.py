@@ -41,6 +41,12 @@ async def admin(message: types.Message, state: FSMContext):
     await message.answer("Введите логин: ")
 
 
+@dp.message(Command("get_image_id_mozgi_ne_ebi"))
+async def get_file_id(message: types.Message):
+    file_id = message.video.file_id
+    await message.answer(file_id)
+
+
 async def main():
     bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp.include_routers(
