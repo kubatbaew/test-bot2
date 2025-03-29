@@ -39,7 +39,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-SELF_SSL = False
+SELF_SSL = True
 
 # Path to webhook route, on which Telegram will send requests
 WEBHOOK_PATH = "/" + getenv("PROJECT_NAME")
