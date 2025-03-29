@@ -23,7 +23,7 @@ async def get_goods_client(goods_data):
     goods_text = "\n".join(
         f"<b>Трек-код:</b> {item['track_code']}\n"
         f"<b>Вес товара:</b> {item['height']} кг\n"
-        f"<b>Цена товара:</b> {int(float(item['price'].replace(",", ".")) // 1 + 1)} сом\n\n"
+        f"<b>Цена товара:</b> {int((float(item['price'].replace(",", ".")) // 1) + 1)} сом\n\n"
         for item in goods
     )
 
