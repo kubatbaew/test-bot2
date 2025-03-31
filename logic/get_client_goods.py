@@ -11,11 +11,25 @@ goods_sheet_id = "1C1oHa-aeRzKasCnEu_swMamEBCQ15AkZPUvrRuzQ9bg"
 users_data_sheet_id = "1wHO5MzW9fVUTkwmKy5uulCHxujzF3_X001a0OCSJl3I"
 workbook1 = client.open_by_key(goods_sheet_id)
 workbook2 = client.open_by_key(users_data_sheet_id)
-sheet = workbook1.worksheet("март")
+sheet = workbook1.worksheet("апрель")
 sheet2 = workbook2.worksheet("База клиентов")
 
 
-def get_goods(client_id, client_name):
+def get_user_data(client_id):
+    data = sheet2.get_all_values()
+    header = data[0]
+    rows = data[1:]
+
+    data = []
+    for row in rows:
+        if row[0] == client_id:
+            data.append(row)
+
+    
+    return data[0]
+
+
+def get_goods(client_id, client_name, admin = False):
     data = sheet.get_all_values()
     header = data[0]
     rows = data[1:]
@@ -23,6 +37,13 @@ def get_goods(client_id, client_name):
     result = []
     temp_group = []
     client_data = {"goods": []}
+    client_name = get_user_data(client_id)
+
+    if admin:
+        client_name = "ADMIN"
+
+    
+    print(client_name[1])
 
     for row in rows:
         if any(row):
@@ -44,7 +65,7 @@ def get_goods(client_id, client_name):
 
             if row[2] and row[3] and row[-4]:
                 if client_name != "ADMIN":
-                    if client_name.lower() not in row[2].lower():
+                    if client_name[1].lower() not in row[2].lower():
                         return {"name_valid": False, "goods": True}
 
                 client_data["status"] = row[-4]
@@ -58,19 +79,6 @@ def get_goods(client_id, client_name):
         return {"goods": False, "name": True}
     return {"client_data": client_data, "goods": True, "name_valid": True}
 
-
-def get_user_data(client_id):
-    data = sheet2.get_all_values()
-    header = data[0]
-    rows = data[1:]
-
-    data = []
-    for row in rows:
-        if row[0] == client_id:
-            data.append(row)
-
-    
-    return data[0]
 
 
 def update_checked_status(client_id):

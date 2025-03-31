@@ -1,3 +1,6 @@
+from decimal import Decimal
+import math
+
 from logic.get_client_goods import get_user_data
 
 with open("components/html/description.html", "r", encoding="utf-8") as file:
@@ -19,15 +22,18 @@ async def get_goods_client(goods_data):
 
     # Количество товаров
     total_goods_count = len(goods)
+    full_total_price = math.ceil(sum(float(good['price'].replace(",", ".")) for good in goods))
+    full_height_price = round(float(sum(Decimal(good['height'].replace(",", ".")) for good in goods)), 2)
+
 
     goods_text = "\n".join(
         f"<b>Трек-код:</b> {item['track_code']}\n"
-        f"<b>Вес товара:</b> {item['height']} кг\n"
-        f"<b>Цена товара:</b> {int((float(item['price'].replace(",", ".")) // 1) + 1)} сом\n\n"
+        f"<b>Вес посылки:</b> {item['height']} кг\n"
+        f"<b>Цена доставки:</b> {int(round(float(item['price'].replace(",", "."))))} сом\n"
         for item in goods
     )
 
-    content = ISSUE_INFO_MESSAGE.format(name, full_price, full_height, total_goods_count, goods_text)
+    content = ISSUE_INFO_MESSAGE.format(name, full_total_price, full_height_price, total_goods_count, goods_text)
     return content
 
 
@@ -60,6 +66,11 @@ async def get_goods_client_for_admin(goods_data):
     full_price = int(float(goods_data["client_data"]["full_price"].replace(",", ".")) // 1 + 1)
     full_height = goods_data["client_data"]["full_height"]
 
+    full_total_price = math.ceil(sum(float(good['price'].replace(",", ".")) for good in goods))
+    full_height_price = round(float(sum(Decimal(good['height'].replace(",", ".")) for good in goods)), 2)
+    
+    print(full_total_price)
+
     user_data = get_user_data(goods_data["client_data"]["KK"])
     surname = user_data[2]
     phone_number = user_data[3]
@@ -69,10 +80,10 @@ async def get_goods_client_for_admin(goods_data):
 
     goods_text = "\n".join(
         f"<b>Трек-код:</b> {item['track_code']}\n"
-        f"<b>Вес товара:</b> {item['height']} кг\n"
-        f"<b>Цена товара:</b> {int(float(item['price'].replace(",", ".")) // 1 + 1)} сом\n\n"
+        f"<b>Вес посылки:</b> {item['height']} кг\n"
+        f"<b>Цена доставки:</b> {int(float(item['price'].replace(",", ".")) // 1 + 1)} сом\n\n"
         for item in goods
     )
 
-    content = ISSUE_INFO_MESSAGE_FOR_ADMIN.format(name, surname, phone_number,full_price, full_height, total_goods_count, goods_text)
+    content = ISSUE_INFO_MESSAGE_FOR_ADMIN.format(name, surname, phone_number,full_total_price, full_height_price, total_goods_count, goods_text)
     return content

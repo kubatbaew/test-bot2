@@ -53,14 +53,15 @@ async def give_goods(message: types.Message, state: FSMContext):
 
 @admin_router.message(GiveGoodState.client_code)
 async def get_name(message: types.Message, state: FSMContext):
-    await state.update_data(client_code=message.text)
+    client_code = message.text[:2].upper() + message.text[2:]
+    await state.update_data(client_code=client_code)
     data = await state.get_data()
 
     # await state.clear()
 
     wait = await message.answer("Ждите...")
 
-    goods_data = get_goods(data["client_code"], "ADMIN")
+    goods_data = get_goods(data["client_code"], "ADMIN", admin=True)
     await wait.delete()
 
     if not goods_data["goods"]:

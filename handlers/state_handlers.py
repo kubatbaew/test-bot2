@@ -52,7 +52,8 @@ async def response_invoice(message: Message, state: FSMContext):
 
 @state_router.message(ReadyGoodsState.client_code)
 async def get_client_code(message: Message, state: FSMContext):
-    await state.update_data(client_code=message.text)
+    client_code = message.text[:2].upper() + message.text[2:]
+    await state.update_data(client_code=client_code)
     await state.set_state(ReadyGoodsState.name)
     await message.answer(GET_NAME_MESSAGE)
 
@@ -67,12 +68,15 @@ async def get_client_code(message: Message, state: FSMContext):
     # print(data)
 
     print(data)
-    goods_data = get_goods(data["client_code"], data["name"])
+
+    kk_code = data["client_code"] if "KK" in data["client_code"] else data["client_code"].replace("КК", "KK")
+
+    goods_data = get_goods(kk_code, data["name"])
     await wait_mes.delete()
 
     if not goods_data["goods"]:
         await message.answer(
-            "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Где мой товар?",
+            "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Отследить посылку",
             reply_markup=main_keyboard,
         )
     elif not goods_data["name_valid"]:
