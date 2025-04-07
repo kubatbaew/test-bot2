@@ -27,9 +27,9 @@ async def get_goods_client(goods_data):
 
 
     goods_text = "\n".join(
-        f"<b>Трек-код:</b> {item['track_code']}\n"
-        f"<b>Вес посылки:</b> {item['height']} кг\n"
-        f"<b>Цена доставки:</b> {int(round(float(item['price'].replace(",", "."))))} сом\n"
+        f"Трек-код: {item['track_code']}\n"
+        f"Вес посылки: {item['height']} кг\n"
+        f"Цена доставки: {math.ceil(float(item['price'].replace(',', '.')))} сом\n"
         for item in goods
     )
 
@@ -48,11 +48,18 @@ async def get_send_data_message(data):
     for dt in data["data"]["data"]["wlMessageList"][::-1]:
         mess = dt["elsAddress"]
         date = dt["dateTime"]
+        print(mess)
         if "Код склада в Китае" in mess:
             mess = (
                 "Посылка доставлена на наш склад в Китае и сейчас на этапе сортировки."
             )
-        content += f"\n<b>Время: {date}</b>\n<b>Статус:</b> <i>{mess}</i>\n"
+            content += f"\n<b>Время: {date}</b>\n<b>Статус:</b> <i>{mess}</i>\n"
+
+        elif "склад в Бишкеке" in mess:
+            mess = ("Товар поступил на склад в Бишкеке и вот-вот начнется сортировка. Персонал уведомит наш офис КАРГО в течение 24 часов. Посылки доедут на наш пункт выдачи и будут доступны к получению в течение 72 часов.")
+            content += f"\n<b>Время: {date}</b>\n<b>✅ Статус:</b> <i>{mess}</i>\n"
+        else:
+            content += f"\n<b>Время: {date}</b>\n<b>Статус:</b> <i>{mess}</i>\n"
 
     return content
 
@@ -81,7 +88,7 @@ async def get_goods_client_for_admin(goods_data):
     goods_text = "\n".join(
         f"<b>Трек-код:</b> {item['track_code']}\n"
         f"<b>Вес посылки:</b> {item['height']} кг\n"
-        f"<b>Цена доставки:</b> {int(float(item['price'].replace(",", ".")) // 1 + 1)} сом\n\n"
+        f"<b>Цена доставки:</b> {math.ceil(float(item['price'].replace(',', '.')))} сом\n\n"
         for item in goods
     )
 

@@ -40,7 +40,7 @@ async def issue_info_goods(message: Message, state: FSMContext):
 @state_router.message()
 async def handle_invalid_message(message: Message):
     if not is_valid_message(message.text):
-        if message.from_user.id != query.get_admin_id():
+        if message.from_user.id not in query.get_admin_id():
             await message.delete()
             await message.answer(templates.IS_VALID_MESSAGE, reply_markup=main_keyboard)
         else:

@@ -82,9 +82,9 @@ bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 @dp.message(CommandStart())
 async def start(message: types.Message, state: FSMContext):
-    if message.from_user.id == query.get_admin_id():
+    if message.from_user.id in query.get_admin_id():
         return await message.answer(
-            "Добро пожаловать! Выберите действия: ", reply_markup=admin_keyboard
+            "Вас приветствует Global Trade Bot! 👋🤖\n\nДобро пожаловать админ!", reply_markup=admin_keyboard
         )
 
     await message.answer(templates.START_MESSAGE, reply_markup=main_keyboard)

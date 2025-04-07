@@ -61,13 +61,16 @@ async def get_name(message: types.Message, state: FSMContext):
 
     wait = await message.answer("Ждите...")
 
-    goods_data = get_goods(data["client_code"], "ADMIN", admin=True)
+    goods_data = get_goods(data["client_code"].replace("КК", "KK"), "ADMIN", admin=True)
     await wait.delete()
+
+    # await state.clear()
 
     if not goods_data["goods"]:
         await message.answer(
             "Товара пока нет."
         )
+        await state.clear()
     else:
         content = await get_goods_client_for_admin(goods_data)
         await state.set_state(GiveGoodState.confirm)
@@ -101,6 +104,6 @@ async def update_data(message: types.Message, state: FSMContext):
 
 @admin_router.message(MainFilter(ADMIN_KEYBOARD_MESSAGE[1]))
 async def logout_admin(message: types.Message):
-    query.clear_admin_id()
+    query.clear_admin_id(message.from_user.id)
 
     await message.answer("Удачного вам дня!", reply_markup=main_keyboard)

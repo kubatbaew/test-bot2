@@ -19,8 +19,11 @@ from components.html_templates import (
 )
 from keyboards.main_keyboard import main_keyboard
 
-from logic.get_client_goods import get_goods
+from logic.get_client_goods import get_goods, get_user_data
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 state_router = Router()
 
@@ -31,7 +34,7 @@ async def response_invoice(message: Message, state: FSMContext):
     loading_message = await message.answer(text="Ваш запрос принят⏳")
 
     try:
-        data = get_data(message.text)
+        data = await get_data(message.text)
         await loading_message.delete()
 
         if data["data"]["data"]["wlOrder"] is None:
@@ -59,24 +62,52 @@ async def get_client_code(message: Message, state: FSMContext):
 
 
 @state_router.message(ReadyGoodsState.name)
-async def get_client_code(message: Message, state: FSMContext):
+async def send_client_code(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     wait_mes = await message.answer("Подождите, идёт поиск... 🔍⏳")
     data = await state.get_data()
     await state.clear()
+    await state.set_state(None)
 
     # print(data)
 
     print(data)
 
     kk_code = data["client_code"] if "KK" in data["client_code"] else data["client_code"].replace("КК", "KK")
+    kk_name_db = get_user_data(kk_code)
 
-    goods_data = get_goods(kk_code, data["name"])
+    logging.info("***")
+    logging.info(data["name"])
+    logging.info(kk_name_db)
+    if kk_name_db[0] != kk_code:
+        await message.answer(
+            "Вы неправильно ввели свой клиентский код (пример - ваш код: KK-ваш код) 🔢📝",
+            reply_markup=main_keyboard,
+        )
+        await state.clear()
+        await wait_mes.delete()
+        return
+
+    if data["name"].lower() not in kk_name_db[1].lower().split() or kk_name_db[1] == "N":
+        await message.answer(
+            "Вы ввели неправильное имя.",
+            reply_markup=main_keyboard,
+        )
+        await state.clear()
+        await wait_mes.delete()
+        return 
+
+    goods_data = get_goods(kk_code, data["name"], False)
     await wait_mes.delete()
 
     if not goods_data["goods"]:
         await message.answer(
             "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Отследить посылку",
+            reply_markup=main_keyboard,
+        )
+    elif goods_data.get("kk_code_not_valid") == True:
+        await message.answer(
+            "Вы неправильно ввели свой клиентский код (пример - ваш код: KK-ваш код) 🔢📝",
             reply_markup=main_keyboard,
         )
     elif not goods_data["name_valid"]:

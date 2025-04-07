@@ -2,6 +2,8 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
+import logging
+logging.basicConfig(level=logging.INFO)
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
 creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
@@ -26,7 +28,7 @@ def get_user_data(client_id):
             data.append(row)
 
     
-    return data[0]
+    return data[0] if data else "None"
 
 
 def get_goods(client_id, client_name, admin = False):
@@ -44,6 +46,7 @@ def get_goods(client_id, client_name, admin = False):
 
     
     print(client_name[1])
+    logging.info(client_name[1])
 
     for row in rows:
         if any(row):
@@ -64,6 +67,7 @@ def get_goods(client_id, client_name, admin = False):
             )
 
             if row[2] and row[3] and row[-4]:
+                logging.info(row[2])
                 if client_name != "ADMIN":
                     if client_name[1].lower() not in row[2].lower():
                         return {"name_valid": False, "goods": True}
@@ -73,6 +77,8 @@ def get_goods(client_id, client_name, admin = False):
                 client_data["phone_number"] = row[3]
                 client_data["full_price"] = row[-6]
                 client_data["full_height"] = row[-5]
+            else:
+                return {"kk_code_not_valid": True, "goods": True}
 
     # print(json.dumps(client_data, indent=4))
     if not client_data["goods"]:
