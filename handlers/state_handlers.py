@@ -86,6 +86,10 @@ async def send_client_code(message: Message, state: FSMContext):
     logging.info("***")
     logging.info(data["name"])
     logging.info(kk_name_db)
+
+    kk_parts = kk_name_db.lower().split()
+    data_name_parts = data["name"].lower().split()
+    
     if kk_name_db[0] != kk_code:
         await message.answer(
             "Вы неправильно ввели свой клиентский код (пример - ваш код: KK-ваш код)",
@@ -95,7 +99,7 @@ async def send_client_code(message: Message, state: FSMContext):
         await wait_mes.delete()
         return
 
-    elif kk_name_db[1] == "N" or kk_name_db[1].lower() not in data["name"].lower().split():
+    elif not any(part in data_name_parts for part in kk_parts if part != "n"):
         await message.answer(
             "Вы ввели неправильное имя.",
             reply_markup=main_keyboard,
