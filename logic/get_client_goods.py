@@ -17,8 +17,15 @@ sheet = workbook1.worksheet("апрель")
 sheet2 = workbook2.worksheet("База клиентов")
 
 
+def get_sheet():
+    return client.open_by_key(goods_sheet_id).worksheet("апрель")
+
+def get_users_sheet():
+    return client.open_by_key(users_data_sheet_id).worksheet("База клиентов")
+
+
 def get_check_track_code_user(track_code):
-    data = sheet.get_all_values()
+    data = get_sheet().get_all_values()
     header = data[0]
     rows = data[1:]
 
@@ -29,7 +36,7 @@ def get_check_track_code_user(track_code):
 
 
 def get_user_data(client_id):
-    data = sheet2.get_all_values()
+    data = get_users_sheet().get_all_values()
     header = data[0]
     rows = data[1:]
 
@@ -43,7 +50,7 @@ def get_user_data(client_id):
 
 
 def get_goods(client_id, client_name, admin = False):
-    data = sheet.get_all_values()
+    data = get_sheet().get_all_values()
     header = data[0]
     rows = data[1:]
 
@@ -108,7 +115,7 @@ def get_goods(client_id, client_name, admin = False):
 
 
 def update_checked_status(client_id):
-    data = sheet.get_all_values()
+    data = get_sheet().get_all_values()
     rows = data[1:]  # Пропускаем заголовки
     
     batch_updates = []
