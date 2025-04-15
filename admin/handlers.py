@@ -51,6 +51,13 @@ async def give_goods(message: types.Message, state: FSMContext):
     await message.answer(templates.ADMIN_GET_CLIENT_CODE_MESSAGE)
 
 
+@admin_router.message(MainFilter("🔄 Обновить бота"))
+async def give_goods(message: types.Message, state: FSMContext):
+    query.clear_admin_id(message.from_user.id)
+    query.update_admin_id(new_id=message.from_user.id)
+    await message.answer("Обновление завершено ✅")
+
+
 @admin_router.message(GiveGoodState.client_code)
 async def get_name(message: types.Message, state: FSMContext):
     client_code = message.text[:2].upper() + message.text[2:]

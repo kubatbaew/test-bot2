@@ -1,5 +1,6 @@
 from decimal import Decimal
 import math
+from collections import defaultdict
 
 from logic.get_client_goods import get_user_data
 
@@ -25,15 +26,27 @@ async def get_goods_client(goods_data):
     full_total_price = math.ceil(sum(float(good['price'].replace(",", ".")) for good in goods))
     full_height_price = round(float(sum(Decimal(good['height'].replace(",", ".")) for good in goods)), 2)
 
+    # Группируем по дате прибытия
+    grouped_goods = defaultdict(list)
+    for item in goods:
+        arrival_date = item.get("arrival_date", "Неизвестная дата")  # Обязательно наличие даты
+        grouped_goods[arrival_date].append(item)
 
-    goods_text = "\n".join(
-        f"Трек-код: {item['track_code']}\n"
-        f"Вес посылки: {item['height']} кг\n"
-        f"Цена доставки: {math.ceil(float(item['price'].replace(',', '.')))} сом\n"
-        for item in goods
-    )
+    # Формируем текст по группам
+    goods_text = "<b>📦Товары к получению:</b>\n\n"
+    for date in sorted(grouped_goods.keys()):
+        goods_text += f"<b>🗓️Дата прибытия - {date}</b>\n\n"
+        for item in grouped_goods[date]:
+            weight = item['height'].replace(".", ",")
+            price = math.ceil(float(item['price'].replace(",", ".")))
+            goods_text += (
+                f"Трек-код: {item['track_code']}\n"
+                f"Вес посылки: {weight} кг\n"
+                f"Цена доставки: {price} сом\n\n"
+            )
 
-    content = ISSUE_INFO_MESSAGE.format(name, full_total_price, full_height_price, total_goods_count, goods_text)
+    # Подставляем в шаблон
+    content = ISSUE_INFO_MESSAGE.format(name, goods_data["client_data"]["KK"], full_total_price, full_height_price, total_goods_count, goods_text.strip())
     return content
 
 
@@ -85,12 +98,28 @@ async def get_goods_client_for_admin(goods_data):
     # Количество товаров
     total_goods_count = len(goods)
 
-    goods_text = "\n".join(
-        f"<b>Трек-код:</b> {item['track_code']}\n"
-        f"<b>Вес посылки:</b> {item['height']} кг\n"
-        f"<b>Цена доставки:</b> {math.ceil(float(item['price'].replace(',', '.')))} сом\n\n"
-        for item in goods
+    # Группировка по дате прибытия
+    grouped_goods = defaultdict(list)
+    for item in goods:
+        arrival_date = item.get("arrival_date", "Неизвестная дата")
+        grouped_goods[arrival_date].append(item)
+
+    # Формируем блок с посылками
+    goods_text = ""
+    for date in sorted(grouped_goods.keys()):
+        goods_text += f"<b>🗓️Дата прибытия - {date}</b>\n\n"
+        for item in grouped_goods[date]:
+            weight = item['height'].replace(".", ",")
+            price = math.ceil(float(item['price'].replace(",", ".")))
+            goods_text += (
+                f"Трек-код: {item['track_code']}\n"
+                f"Вес посылки: {weight} кг\n"
+                f"Цена доставки: {price} сом\n\n"
+            )
+
+    # Формируем сообщение
+    content = ISSUE_INFO_MESSAGE_FOR_ADMIN.format(
+        name, surname, phone_number, goods_data["client_data"]["KK"], full_total_price, full_height_price, total_goods_count, goods_text.strip()
     )
 
-    content = ISSUE_INFO_MESSAGE_FOR_ADMIN.format(name, surname, phone_number,full_total_price, full_height_price, total_goods_count, goods_text)
     return content

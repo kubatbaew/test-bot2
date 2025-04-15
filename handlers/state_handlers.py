@@ -55,6 +55,13 @@ async def response_invoice(message: Message, state: FSMContext):
 
 @state_router.message(ReadyGoodsState.client_code)
 async def get_client_code(message: Message, state: FSMContext):
+    if 'kk' not in message.text.lower() and "кк" not in message.text.lower():
+        await message.answer(
+            "Пожалуйста введите полный клиентский код «Пример: KK-ваш код»",
+        )
+        await state.set_state(ReadyGoodsState.client_code)
+        return
+
     client_code = message.text[:2].upper() + message.text[2:]
     await state.update_data(client_code=client_code)
     await state.set_state(ReadyGoodsState.name)
@@ -81,14 +88,14 @@ async def send_client_code(message: Message, state: FSMContext):
     logging.info(kk_name_db)
     if kk_name_db[0] != kk_code:
         await message.answer(
-            "Вы неправильно ввели свой клиентский код (пример - ваш код: KK-ваш код) 🔢📝",
+            "Вы неправильно ввели свой клиентский код (пример - ваш код: KK-ваш код)",
             reply_markup=main_keyboard,
         )
         await state.clear()
         await wait_mes.delete()
         return
 
-    if data["name"].lower() not in kk_name_db[1].lower().split() or kk_name_db[1] == "N":
+    elif data["name"].lower() not in kk_name_db[1].lower().split() or kk_name_db[1] == "N":
         await message.answer(
             "Вы ввели неправильное имя.",
             reply_markup=main_keyboard,
@@ -105,17 +112,16 @@ async def send_client_code(message: Message, state: FSMContext):
             "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Отследить посылку",
             reply_markup=main_keyboard,
         )
-    elif goods_data.get("kk_code_not_valid") == True:
-        await message.answer(
-            "Вы неправильно ввели свой клиентский код (пример - ваш код: KK-ваш код) 🔢📝",
-            reply_markup=main_keyboard,
-        )
     elif not goods_data["name_valid"]:
         await message.answer(
             "Вы ввели неправильное имя.",
             reply_markup=main_keyboard,
         )
     else:
+        if not goods_data['client_data'].get("name"):
+            await message.answer("Пожалуйста попробуйте по позже", reply_markup=main_keyboard)
+            return
+
         content = await get_goods_client(goods_data)
 
         await message.answer(content)

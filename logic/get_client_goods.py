@@ -46,28 +46,37 @@ def get_goods(client_id, client_name, admin = False):
 
     
     print(client_name[1])
-    logging.info(client_name[1])
+    # logging.info(client_name[1])
 
     for row in rows:
         if any(row):
             temp_group.append(row)
         else:
-            if any(r[-4] == "FALSE" for r in temp_group if r):
+            asd = [r[-4] for r in temp_group if r]
+            # logging.info(asd)
+            if any(str(r[-4]).strip().upper() == "FALSE" for r in temp_group if r):
                 result.extend(temp_group)
             temp_group = []
 
-    if any(r[-4] == "FALSE" for r in temp_group if r):
+    if any(str(r[-4]).strip().upper() == "FALSE" for r in temp_group if r):
         result.extend(temp_group)
+    
+    current_arrival_date = None
 
-    for row in result:
+    for row in result[::-1]:
+        # logging.info(row)
         if row[1] == client_id:
+            if row[12]:
+                current_arrival_date = row[12]
+
+            # logging.info(row)
             client_data["KK"] = row[1]
             client_data["goods"].append(
-                {"track_code": row[4], "height": row[5], "price": row[7]}
+                {"track_code": row[4], "height": row[5], "price": row[7], "arrival_date": current_arrival_date or "Неизвестная дата"}
             )
 
             if row[2] and row[3] and row[-4]:
-                logging.info(row[2])
+                # logging.info(row[2])
                 if client_name != "ADMIN":
                     if client_name[1].lower() not in row[2].lower():
                         return {"name_valid": False, "goods": True}
@@ -77,12 +86,12 @@ def get_goods(client_id, client_name, admin = False):
                 client_data["phone_number"] = row[3]
                 client_data["full_price"] = row[-6]
                 client_data["full_height"] = row[-5]
-            else:
-                return {"kk_code_not_valid": True, "goods": True}
 
     # print(json.dumps(client_data, indent=4))
+    
     if not client_data["goods"]:
         return {"goods": False, "name": True}
+    logging.info(client_data)
     return {"client_data": client_data, "goods": True, "name_valid": True}
 
 
@@ -94,6 +103,8 @@ def update_checked_status(client_id):
     batch_updates = []
     
     for i, row in enumerate(rows, start=2):  # Индексируем с 2 (учет заголовка)
+        logging.info(row[10])
+        logging.info("admin")
         if row[1] == client_id and row[10] == "FALSE":  # Колонка K (индекс 10)
             batch_updates.append({
                 'range': f'K{i}',

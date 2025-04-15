@@ -8,6 +8,9 @@ admin_keyboard = types.ReplyKeyboardMarkup(
         [
             types.KeyboardButton(text=ADMIN_KEYBOARD_MESSAGE[0]),
             types.KeyboardButton(text=ADMIN_KEYBOARD_MESSAGE[1]),
+        ],
+        [
+            types.KeyboardButton(text="🔄 Обновить бота"),
         ]
     ],
     resize_keyboard=True,
