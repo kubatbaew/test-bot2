@@ -2,7 +2,7 @@ from decimal import Decimal
 import math
 from collections import defaultdict
 
-from logic.get_client_goods import get_user_data
+from logic.get_client_goods import get_user_data, get_check_track_code_user
 
 with open("components/html/description.html", "r", encoding="utf-8") as file:
     DESCRIPTION_MESSAGE = file.read()
@@ -59,6 +59,7 @@ async def get_send_data_message(data):
         data["data"]["data"]["wlOrder"]["quantity"],
     )
     for dt in data["data"]["data"]["wlMessageList"][::-1]:
+        track_code = dt["orderId"]
         mess = dt["elsAddress"]
         date = dt["dateTime"]
         print(mess)
@@ -70,7 +71,11 @@ async def get_send_data_message(data):
 
         elif "склад в Бишкеке" in mess:
             mess = ("Товар поступил на склад в Бишкеке и вот-вот начнется сортировка. Персонал уведомит наш офис КАРГО в течение 24 часов. Посылки доедут на наш пункт выдачи и будут доступны к получению в течение 72 часов.")
-            content += f"\n<b>Время: {date}</b>\n<b>✅ Статус:</b> <i>{mess}</i>\n"
+            content += f"\n<b>Время: {date}</b>\n<b>Статус:</b> <i>{mess}</i>\n"
+
+            if get_check_track_code_user(track_code):
+                new_status = "Посылка готова к выдачи. Вы можете забрать ее по адресу: город Ош, ул. Курманжан датка 236.\n\nhttps://go.2gis.com/5yJuh"
+                content += f"\n<b>✅ Статус:</b> <i>{new_status}</i>\n"            
         else:
             content += f"\n<b>Время: {date}</b>\n<b>Статус:</b> <i>{mess}</i>\n"
 

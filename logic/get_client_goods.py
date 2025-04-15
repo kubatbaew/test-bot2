@@ -17,6 +17,17 @@ sheet = workbook1.worksheet("апрель")
 sheet2 = workbook2.worksheet("База клиентов")
 
 
+def get_check_track_code_user(track_code):
+    data = sheet.get_all_values()
+    header = data[0]
+    rows = data[1:]
+
+    for row in rows:
+        if row[4] == track_code:
+            return True
+    
+
+
 def get_user_data(client_id):
     data = sheet2.get_all_values()
     header = data[0]
