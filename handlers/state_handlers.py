@@ -73,8 +73,8 @@ async def send_client_code(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     wait_mes = await message.answer("Подождите, идёт поиск... 🔍⏳")
     data = await state.get_data()
-    await state.clear()
-    await state.set_state(None)
+    # await state.clear()
+    # await state.set_state(None)
 
     # print(data)
 
@@ -132,3 +132,6 @@ async def send_client_code(message: Message, state: FSMContext):
 
         await message.answer(content)
         await message.answer(ISSUE_INFO_NEXT_MESSAGE, reply_markup=main_keyboard)
+
+        await state.clear()
+
