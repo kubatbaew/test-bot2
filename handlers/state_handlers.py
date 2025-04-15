@@ -95,7 +95,7 @@ async def send_client_code(message: Message, state: FSMContext):
         await wait_mes.delete()
         return
 
-    elif data["name"].lower() not in kk_name_db[1].lower().split() or kk_name_db[1] == "N":
+    elif kk_name_db[1] == "N" or kk_name_db[1].lower() not in data["name"].lower().split():
         await message.answer(
             "Вы ввели неправильное имя.",
             reply_markup=main_keyboard,
