@@ -101,7 +101,7 @@ async def send_client_code(message: Message, state: FSMContext):
 
     elif not any(part in data_name_parts for part in kk_parts if part != "n"):
         await message.answer(
-            "Вы ввели неправильное имя.(введите заново)",
+            "❗ Похоже, вы ввели некорректное имя. Пожалуйста, попробуйте снова.",
         )
         await state.set_state(ReadyGoodsState.name)
         await wait_mes.delete()
@@ -117,7 +117,7 @@ async def send_client_code(message: Message, state: FSMContext):
         )
     elif not goods_data["name_valid"]:
         await message.answer(
-            "Вы ввели неправильное имя.(введите заново)",
+            "❗ Похоже, вы ввели некорректное имя. Пожалуйста, попробуйте снова.",
         )
         await state.set_state(ReadyGoodsState.name)
         return
