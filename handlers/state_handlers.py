@@ -87,8 +87,8 @@ async def send_client_code(message: Message, state: FSMContext):
     logging.info(data["name"])
     logging.info(kk_name_db)
 
-    kk_parts = kk_name_db[1].lower().split()
-    data_name_parts = data["name"].lower().split()
+    kk_parts = kk_name_db[1].strip().lower().split()
+    data_name_parts = data["name"].strip().lower().split()
     
     if kk_name_db[0] != kk_code:
         await message.answer(
