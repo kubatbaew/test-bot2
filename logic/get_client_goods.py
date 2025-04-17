@@ -96,7 +96,7 @@ def get_goods(client_id, client_name, admin = False):
             if row[2] and row[3] and row[-4]:
                 # logging.info(row[2])
                 if client_name != "ADMIN":
-                    if client_name[1].lower() not in row[2].lower():
+                    if client_name[1].strip().lower() not in row[2].strip().lower():
                         return {"name_valid": False, "goods": True}
 
                 client_data["status"] = row[-4]
