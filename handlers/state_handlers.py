@@ -89,6 +89,7 @@ async def send_client_code(message: Message, state: FSMContext):
 
     kk_parts = kk_name_db[1].strip().lower().split()
     data_name_parts = data["name"].strip().lower().split()
+    logging.info(f"Names = {kk_parts} - {data_name_parts}")
     
     if kk_name_db[0] != kk_code:
         await message.answer(
@@ -99,7 +100,8 @@ async def send_client_code(message: Message, state: FSMContext):
         await wait_mes.delete()
         return
 
-    elif not any(part in data_name_parts for part in kk_parts if part != "n"):
+    elif not any(part in kk_parts for part in data_name_parts if part != "n"):
+        logging.info(f"dont' correct name = {kk_parts} - {data_name_parts}")
         await message.answer(
             "❗ Похоже, вы ввели некорректное имя. Пожалуйста, попробуйте снова.",
         )
