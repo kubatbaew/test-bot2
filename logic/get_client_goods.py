@@ -136,7 +136,7 @@ def update_checked_status(client_id):
     logging.info(batch_updates)
 
     if batch_updates:
-        sheet.batch_update(batch_updates)
+        get_sheet().batch_update(batch_updates)
     else:
         return update_checked_status_next(client_id)
 
@@ -221,9 +221,9 @@ def update_checked_status_next(client_id):
                 'range': f'K{i}',
                 'values': [[True]]
             })
-            
+
     logging.info(batch_updates)
     if batch_updates:
-        sheet.batch_update(batch_updates)
+        get_sheet_next().batch_update(batch_updates)
 
     return True
