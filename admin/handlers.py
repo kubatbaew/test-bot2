@@ -13,7 +13,7 @@ from components.html_templates import get_goods_client_for_admin
 from components import templates
 
 from db import query
-from logic.get_client_goods import get_goods, get_user_data, update_checked_status
+from logic.get_client_goods import get_goods, get_goods_next, get_user_data, update_checked_status
 
 
 admin_router = Router()
@@ -68,22 +68,33 @@ async def get_name(message: types.Message, state: FSMContext):
 
     wait = await message.answer("Ждите...")
 
-    goods_data = get_goods(data["client_code"].replace("КК", "KK"), "ADMIN", admin=True)
+    kk = data["client_code"].replace("КК", "KK")
+
+    goods_data = get_goods(kk, "ADMIN", admin=True)
+    next_goods_data = get_goods_next(kk, "ADMIN", admin=True)
+
     await wait.delete()
 
-    # await state.clear()
+    # Объединяем товары
+    combined_goods = goods_data.get("client_data", {}).get("goods", []) + \
+                    next_goods_data.get("client_data", {}).get("goods", [])
 
-    if not goods_data["goods"]:
-        await message.answer(
-            "Товара пока нет."
-        )
+    # Если товаров нет вообще
+    if not combined_goods:
+        await message.answer("Товара пока нет.")
         await state.clear()
-    else:
-        content = await get_goods_client_for_admin(goods_data)
-        await state.set_state(GiveGoodState.confirm)
+        return
 
-        await message.answer(content)
-        await message.answer("⚠️ Вы уверены, что хотите выдать товар?", reply_markup=admin_confirm_keyboard)
+    # Берем client_data из одного источника
+    client_data = goods_data.get("client_data") or next_goods_data.get("client_data")
+    client_data["goods"] = combined_goods  # обновляем список товаров
+
+    # Отправка информации
+    content = await get_goods_client_for_admin({"client_data": client_data})
+    await state.set_state(GiveGoodState.confirm)
+
+    await message.answer(content)
+    await message.answer("⚠️ Вы уверены, что хотите выдать товар?", reply_markup=admin_confirm_keyboard)
 
 
 @admin_router.message(GiveGoodState.confirm)
