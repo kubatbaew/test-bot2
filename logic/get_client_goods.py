@@ -117,32 +117,6 @@ def get_goods(client_id, client_name, admin = False):
     return {"client_data": client_data, "goods": True, "name_valid": True}
 
 
-
-def update_checked_status(client_id):
-    data = get_sheet().get_all_values()
-    rows = data[1:]  # Пропускаем заголовки
-    
-    batch_updates = []
-    
-    for i, row in enumerate(rows, start=2):  # Индексируем с 2 (учет заголовка)
-        logging.info(row[10])
-        logging.info("admin")
-        if row[1] == client_id and row[10] == "FALSE":  # Колонка K (индекс 10)
-            batch_updates.append({
-                'range': f'K{i}',
-                'values': [[True]]
-            })
-
-    logging.info(batch_updates)
-
-    if batch_updates:
-        get_sheet().batch_update(batch_updates)
-    else:
-        return update_checked_status_next(client_id)
-
-    return True
-
-
 def get_goods_next(client_id, client_name, admin = False):
     data = get_sheet_next().get_all_values()
     header = data[0]
@@ -207,23 +181,28 @@ def get_goods_next(client_id, client_name, admin = False):
     return {"client_data": client_data, "goods": True, "name_valid": True}
 
 
-def update_checked_status_next(client_id):
-    data = get_sheet_next().get_all_values()
+def update_checked_status(client_id):
+    updated = _update_checked_status_from_sheet(get_sheet(), client_id)
+    if updated:
+        return True
+    return _update_checked_status_from_sheet(get_sheet_next(), client_id)
+
+
+def _update_checked_status_from_sheet(sheet, client_id):
+    data = sheet.get_all_values()
     rows = data[1:]  # Пропускаем заголовки
     
     batch_updates = []
     
     for i, row in enumerate(rows, start=2):  # Индексируем с 2 (учет заголовка)
-        logging.info(row[10])
-        logging.info("admin")
-        if row[1] == client_id and row[10] == "FALSE":  # Колонка K (индекс 10)
+        if row[1] == client_id and row[10].strip().upper() == "FALSE":
             batch_updates.append({
                 'range': f'K{i}',
                 'values': [[True]]
             })
 
-    logging.info(batch_updates)
     if batch_updates:
-        get_sheet_next().batch_update(batch_updates)
+        sheet.batch_update(batch_updates)
+        return True
 
-    return True
+    return False

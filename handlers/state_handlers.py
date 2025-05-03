@@ -19,7 +19,7 @@ from components.html_templates import (
 )
 from keyboards.main_keyboard import main_keyboard
 
-from logic.get_client_goods import get_goods, get_user_data
+from logic.get_client_goods import get_goods, get_goods_next, get_user_data
 
 import logging
 
@@ -110,28 +110,43 @@ async def send_client_code(message: Message, state: FSMContext):
         return 
 
     goods_data = get_goods(kk_code, data["name"], False)
+    next_goods_data = get_goods_next(kk_code, data["name"], False)
+
     await wait_mes.delete()
 
-    if not goods_data["goods"]:
-        await message.answer(
-            "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Отследить посылку",
-            reply_markup=main_keyboard,
-        )
-    elif not goods_data["name_valid"]:
+    # Проверка на корректность имени
+    if not goods_data["name_valid"] or not next_goods_data["name_valid"]:
         await message.answer(
             "❗ Похоже, вы ввели некорректное имя. Пожалуйста, попробуйте снова.",
         )
         await state.set_state(ReadyGoodsState.name)
         return
-    else:
-        if not goods_data['client_data'].get("name"):
-            await message.answer("Пожалуйста попробуйте по позже", reply_markup=main_keyboard)
-            return
 
-        content = await get_goods_client(goods_data)
+    # Объединяем товары
+    combined_goods = (goods_data.get("client_data", {}).get("goods", []) +
+                    next_goods_data.get("client_data", {}).get("goods", []))
 
-        await message.answer(content)
-        await message.answer(ISSUE_INFO_NEXT_MESSAGE, reply_markup=main_keyboard)
+    # Если товаров нет вообще
+    if not combined_goods:
+        await message.answer(
+            "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Отследить посылку",
+            reply_markup=main_keyboard,
+        )
+        return
 
-        await state.clear()
+    # Берем данные клиента из одного из источников (предпочтительно из основного)
+    client_data = goods_data.get("client_data") or next_goods_data.get("client_data")
+    client_data["goods"] = combined_goods
 
+    # Проверка имени
+    if not client_data.get("name"):
+        await message.answer("Пожалуйста попробуйте по позже", reply_markup=main_keyboard)
+        return
+
+    # Отправка информации
+    content = await get_goods_client(client_data)
+    await message.answer(content)
+    await message.answer(ISSUE_INFO_NEXT_MESSAGE, reply_markup=main_keyboard)
+
+    await state.clear()
+    
