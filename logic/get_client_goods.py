@@ -182,10 +182,10 @@ def get_goods_next(client_id, client_name, admin = False):
 
 
 def update_checked_status(client_id):
-    updated = _update_checked_status_from_sheet(get_sheet(), client_id)
-    if updated:
-        return True
-    return _update_checked_status_from_sheet(get_sheet_next(), client_id)
+    updated_apr = _update_checked_status_from_sheet(get_sheet(), client_id)
+    updated_may = _update_checked_status_from_sheet(get_sheet_next(), client_id)
+
+    return updated_apr or updated_may
 
 
 def _update_checked_status_from_sheet(sheet, client_id):
