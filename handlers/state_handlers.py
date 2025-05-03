@@ -144,9 +144,8 @@ async def send_client_code(message: Message, state: FSMContext):
         return
 
     # Отправка информации
-    content = await get_goods_client(client_data)
+    content = await get_goods_client({"client_data": client_data})
     await message.answer(content)
     await message.answer(ISSUE_INFO_NEXT_MESSAGE, reply_markup=main_keyboard)
 
     await state.clear()
-    
