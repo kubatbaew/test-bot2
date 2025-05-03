@@ -111,7 +111,7 @@ def get_goods(client_id, client_name, admin = False):
     # print(json.dumps(client_data, indent=4))
     
     if not client_data["goods"]:
-        return get_goods_next(client_id, client_name, admin)
+        return {"goods": False, "name_valid": True}
 
     logging.info(client_data)
     return {"client_data": client_data, "goods": True, "name_valid": True}
@@ -176,7 +176,7 @@ def get_goods_next(client_id, client_name, admin = False):
     # print(json.dumps(client_data, indent=4))
     
     if not client_data["goods"]:
-        return {"goods": False, "name": True}
+        return {"goods": False, "name_valid": True}
     logging.info(client_data)
     return {"client_data": client_data, "goods": True, "name_valid": True}
 
