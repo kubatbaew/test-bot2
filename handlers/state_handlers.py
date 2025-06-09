@@ -133,7 +133,8 @@ async def send_client_code(message: Message, state: FSMContext):
     # Объединяем товары
     combined_goods = (goods_data.get("client_data", {}).get("goods", []) +
                     next_goods_data.get("client_data", {}).get("goods", []))
-
+    
+    logging.info(combined_goods)
     # Если товаров нет вообще
     if not combined_goods:
         await message.answer(html_templates.UPDATE_TEXT_BOT)
@@ -146,6 +147,7 @@ async def send_client_code(message: Message, state: FSMContext):
     # Берем данные клиента из одного из источников (предпочтительно из основного)
     client_data = goods_data.get("client_data") or next_goods_data.get("client_data")
     client_data["goods"] = combined_goods
+    logging.info(client_data)
 
     # Проверка имени
     if not client_data.get("name"):
