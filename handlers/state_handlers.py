@@ -12,6 +12,8 @@ from components.templates import (
     GET_NAME_MESSAGE,
     GET_PHONE_NUMBER_MESSAGE,
 )
+
+from components import html_templates
 from components.html_templates import (
     get_send_data_message,
     get_goods_client,
@@ -31,6 +33,7 @@ state_router = Router()
 @state_router.message(GetInvoiceNumberState.invoice_number)
 async def response_invoice(message: Message, state: FSMContext):
     await state.clear()
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     loading_message = await message.answer(text="Ваш запрос принят⏳")
 
     try:
@@ -45,12 +48,14 @@ async def response_invoice(message: Message, state: FSMContext):
         content = await get_send_data_message(data)
 
         await message.answer(content, reply_markup=main_keyboard)
+        await message.answer(html_templates.UPDATE_TEXT_BOT)
     except Exception as e:
         await message.answer(
             "Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже. dev={}".format(
                 e
             )
         )
+        await message.answer(html_templates.UPDATE_TEXT_BOT)
 
 
 @state_router.message(ReadyGoodsState.client_code)
@@ -65,12 +70,15 @@ async def get_client_code(message: Message, state: FSMContext):
     client_code = message.text[:2].upper() + message.text[2:]
     await state.update_data(client_code=client_code)
     await state.set_state(ReadyGoodsState.name)
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     await message.answer(GET_NAME_MESSAGE)
+    
 
 
 @state_router.message(ReadyGoodsState.name)
 async def send_client_code(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     wait_mes = await message.answer("Подождите, идёт поиск... 🔍⏳")
     data = await state.get_data()
     # await state.clear()
@@ -128,6 +136,7 @@ async def send_client_code(message: Message, state: FSMContext):
 
     # Если товаров нет вообще
     if not combined_goods:
+        await message.answer(html_templates.UPDATE_TEXT_BOT)
         await message.answer(
             "Товара пока нет. Вы можете узнать его местоположение, нажав на кнопку ниже: 📦 Отследить посылку",
             reply_markup=main_keyboard,
@@ -140,10 +149,12 @@ async def send_client_code(message: Message, state: FSMContext):
 
     # Проверка имени
     if not client_data.get("name"):
+        await message.answer(html_templates.UPDATE_TEXT_BOT)
         await message.answer("Пожалуйста попробуйте по позже", reply_markup=main_keyboard)
         return
 
     # Отправка информации
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     content = await get_goods_client({"client_data": client_data})
     await message.answer(content)
     await message.answer(ISSUE_INFO_NEXT_MESSAGE, reply_markup=main_keyboard)

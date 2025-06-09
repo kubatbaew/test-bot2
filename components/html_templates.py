@@ -12,6 +12,10 @@ with open("components/html/issue_info_next.html", "r", encoding="utf-8") as file
     ISSUE_INFO_NEXT_MESSAGE = file.read()
 
 
+with open("components/html/update_bot.html", "r", encoding="utf-8") as file:
+    UPDATE_TEXT_BOT = file.read()
+
+
 async def get_goods_client(goods_data):
     with open("components/html/issue_info.html", "r", encoding="utf-8") as file:
         ISSUE_INFO_MESSAGE = file.read()

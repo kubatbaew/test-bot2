@@ -28,7 +28,7 @@ def get_users_sheet():
 
 
 def get_check_track_code_user(track_code):
-    data = get_sheet().get_all_values()
+    data = get_sheet_next().get_all_values()
     header = data[0]
     rows = data[1:]
 

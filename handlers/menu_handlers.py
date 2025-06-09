@@ -21,18 +21,21 @@ menu_router = Router()
 
 @menu_router.message(MainFilter(templates.KEYBOARD_MESSAGES[0]))
 async def info(message: Message):
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     await message.answer(html_templates.DESCRIPTION_MESSAGE)
     await message.answer_video(templates.VIDEO_FILE_ID)
 
 
 @menu_router.message(MainFilter(templates.KEYBOARD_MESSAGES[1]))
 async def get_commodity(message: Message, state: FSMContext):
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     await message.answer(templates.GET_COMMODITY_MESSAGE)
     await state.set_state(GetInvoiceNumberState.invoice_number)
 
 
 @menu_router.message(MainFilter(templates.KEYBOARD_MESSAGES[2]))
 async def issue_info_goods(message: Message, state: FSMContext):
+    await message.answer(html_templates.UPDATE_TEXT_BOT)
     await message.answer(templates.GET_CLIENT_CODE_MESSAGE)
     await state.set_state(ReadyGoodsState.client_code)
 
@@ -43,8 +46,10 @@ async def handle_invalid_message(message: Message):
         if message.from_user.id not in query.get_admin_id():
             await message.delete()
             await message.answer(templates.IS_VALID_MESSAGE, reply_markup=main_keyboard)
+            await message.answer(html_templates.UPDATE_TEXT_BOT)
         else:
             await message.delete()
             await message.answer(
                 templates.IS_VALID_MESSAGE, reply_markup=admin_keyboard
             )
+            await message.answer(html_templates.UPDATE_TEXT_BOT)
